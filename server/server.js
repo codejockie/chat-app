@@ -17,18 +17,18 @@ let numberOfConnectedUsers = 0;
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
-  numberOfConnectedUsers++;
-  console.log(`User ${numberOfConnectedUsers} connected`);
-
   socket.on('join', (params, callback) => {
     if (!isRealString(params.name) || !isRealString(params.room)) {
       return callback('Name and room name are required.');
     }
+    
 
     // Joins a specific room
     socket.join(params.room);
     users.removeUser(socket.id);
     users.addUser(socket.id, params.name, params.room);
+
+    console.log(`${params.name} joined room ${params.room}.`);
 
     io.to(params.room).emit('updateUserList', users.getUserList(params.room));
     socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
@@ -61,6 +61,8 @@ io.on('connection', (socket) => {
     if (user) {
       io.to(user.room).emit('updateUserList', users.getUserList(user.room));
       io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} left.`));
+
+      console.log(`${user.name} left room ${user.room}.`);
     }
   });
 });
