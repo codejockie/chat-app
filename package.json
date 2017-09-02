@@ -2,18 +2,18 @@
   "name": "node-chat-app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "engines": {
     "node": "7.x.x"
   },
   "scripts": {
+    "dev": "nodemon -w server --exec babel-node server/server.js",
     "start": "babel-node server/server.js",
     "test": "mocha --compilers js:babel-register -- server/**/*.spec.js",
-    "test:watch": "nodemon --exec \"npm test\"",
-    "dev": "nodemon -w server --exec babel-node server/server.js"
+    "test:watch": "nodemon --exec \"npm test\""
   },
   "keywords": [],
-  "author": "",
+  "author": "John Kennedy - @codejockie",
   "license": "ISC",
   "dependencies": {
     "babel-cli": "^6.26.0",

@@ -3,12 +3,11 @@ export default class Users {
     this.users = [];
   }
   addUser(id, name, room) {
-    const user = {id, name, room};
+    const user = { id, name, room };
     this.users.push(user);
     return user;
   }
   removeUser(id) {
-    // return user that was removed
     const user = this.getUser(id);
 
     if (user) {
@@ -25,5 +24,8 @@ export default class Users {
     const namesArray = users.map(user => user.name);
 
     return namesArray;
+  }
+  getUserByUsername(name) {
+    return this.users.filter(user => user.name === name)[0];
   }
 }

@@ -12,28 +12,35 @@ const publicPath = path.join(__dirname, '../public');
 const server = http.createServer(app);
 const io = socketIO(server);
 const users = new Users();
-let numberOfConnectedUsers = 0;
 
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
   socket.on('join', (params, callback) => {
-    if (!isRealString(params.name) || !isRealString(params.room)) {
+    const room = params.room.toLowerCase();
+    if (!isRealString(params.name) || !isRealString(room)) {
       return callback('Name and room name are required.');
     }
-    
 
-    // Joins a specific room
-    socket.join(params.room);
+    // Check if a user already exists
+    const user = users.getUserByUsername(params.name);
+
+    // Ensure a user can join different rooms with same username
+    if (user && user.room === room) {
+      return callback('Username must be unique.');
+    }
+
+
+    // Join a specific room
+    socket.join(room);
     users.removeUser(socket.id);
-    users.addUser(socket.id, params.name, params.room);
+    users.addUser(socket.id, params.name, room);
 
-    console.log(`${params.name} joined room ${params.room}.`);
-
-    io.to(params.room).emit('updateUserList', users.getUserList(params.room));
+    io.to(room).emit('updateUserList', users.getUserList(room));
     socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
-    socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} joined`));
+    socket.broadcast.to(room).emit('newMessage', generateMessage('Admin', `${params.name} joined`));
 
+    console.log(`${params.name} joined ${room} room.`);
     callback();
   });
 
@@ -62,7 +69,7 @@ io.on('connection', (socket) => {
       io.to(user.room).emit('updateUserList', users.getUserList(user.room));
       io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} left.`));
 
-      console.log(`${user.name} left room ${user.room}.`);
+      console.log(`${user.name} left ${user.room} room.`);
     }
   });
 });
